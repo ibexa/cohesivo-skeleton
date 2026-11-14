@@ -16,10 +16,10 @@
         "php": ">=8.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "ibexa/cohesivo": "~6.0.x-dev",
         "symfony/flex": "^2"
     },
     "flex-require": {
+        "ibexa/cohesivo": "~6.0.x-dev",
         "symfony/console": "*",
         "symfony/dotenv": "*",
         "symfony/framework-bundle": "*",
