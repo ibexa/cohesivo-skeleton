@@ -44,8 +44,6 @@ jobs:
                     php-version: '8.5'
                     coverage: none
 
-            -   uses: ibexa/composer-stability-plugin/actions/install-plugin@main
-
             -   name: Create project from the checked out skeleton
                 run: |
                     composer create-project ibexa/cohesivo-skeleton "$RUNNER_TEMP/project" \
