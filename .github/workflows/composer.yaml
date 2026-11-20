@@ -1,0 +1,65 @@
+name: Validate Composer
+
+on:
+    push:
+        branches:
+            - '[0-9]+.[0-9]+'
+    pull_request: ~
+    workflow_dispatch: ~
+
+jobs:
+    validate:
+        name: Validate composer.json
+        runs-on: ubuntu-26.04
+        timeout-minutes: 5
+
+        steps:
+            -   uses: actions/checkout@v7
+
+            -   uses: ibexa/gh-workflows/actions/setup-composer-root-version@main
+
+            -   name: Setup PHP Action
+                uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+                with:
+                    php-version: '8.5'
+                    coverage: none
+
+            -   name: Validate composer.json
+                run: composer validate --strict --no-check-lock --no-check-publish
+
+    create-project:
+        name: Create project
+        needs: validate
+        runs-on: ubuntu-26.04
+        timeout-minutes: 20
+
+        steps:
+            -   uses: actions/checkout@v7
+                with:
+                    path: skeleton
+
+            -   name: Setup PHP Action
+                uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+                with:
+                    php-version: '8.5'
+                    coverage: none
+
+            -   name: Create project from the checked out skeleton
+                run: |
+                    composer create-project ibexa/cohesivo-skeleton "$RUNNER_TEMP/project" \
+                        --repository='{"type":"path","url":"skeleton","options":{"symlink":false}}' \
+                        --stability=dev \
+                        --no-install \
+                        --no-interaction \
+                        --no-progress
+                    rm -rf skeleton
+                    cp -a "$RUNNER_TEMP/project/." .
+
+            -   uses: ibexa/gh-workflows/actions/composer-install@main
+                with:
+                    php-version: '8.5'
+                    php-extensions: 'bcmath, gd, intl, sodium, xsl'
+                    gh-client-id: ${{ secrets.AUTOMATION_CLIENT_ID }}
+                    gh-client-secret: ${{ secrets.AUTOMATION_CLIENT_SECRET }}
+                    satis-network-key: ${{ secrets.SATIS_NETWORK_KEY }}
+                    satis-network-token: ${{ secrets.SATIS_NETWORK_TOKEN }}
